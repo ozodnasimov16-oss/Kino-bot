@@ -31,12 +31,25 @@ class Config:
     WELCOME_MESSAGE: str = "🎬 Xush kelibsiz! Premium kino botiga marhamat!"
     
     def __post_init__(self):
-        """Validate required fields"""
+        """Validate and fix DATABASE_URL"""
         if not self.BOT_TOKEN:
             raise ValueError("BOT_TOKEN is required in .env file")
-        if not self.DATABASE_URL:
-            raise ValueError("DATABASE_URL is required in .env file")
         if self.ADMIN_ID == 0:
             raise ValueError("ADMIN_ID is required in .env file")
+        
+        # Fix DATABASE_URL for asyncpg
+        if self.DATABASE_URL:
+            if self.DATABASE_URL.startswith("postgresql://"):
+                self.DATABASE_URL = self.DATABASE_URL.replace(
+                    "postgresql://", 
+                    "postgresql+asyncpg://", 
+                    1
+                )
+            elif self.DATABASE_URL.startswith("postgres://"):
+                self.DATABASE_URL = self.DATABASE_URL.replace(
+                    "postgres://", 
+                    "postgresql+asyncpg://", 
+                    1
+                )
 
 config = Config()
